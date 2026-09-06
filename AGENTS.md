@@ -31,3 +31,12 @@
 
 {/* Define what should and shouldn't be documented */}
 {/* Example: Don't document internal admin features */}
+
+## Base44 dev environment
+
+- This repo is a Mintlify docs site (MDX pages + `docs.json`), served by the `mint` CLI — there is no `package.json` or Dockerfile.
+- `docker-compose.base44.yml` runs `node:22-bookworm-slim`, installs `mint` globally at startup, and runs `mint dev --port 3000 --host 0.0.0.0` with the source bind-mounted at `/app`.
+- First boot takes ~50s (global npm install of `mint`); subsequent restarts reuse the cached install via the `npm_cache` / `mint_cache` volumes.
+- The preview is served through an external hostname proxy; `--host 0.0.0.0` makes the Next.js dev server under `mint` accept it. No `allowedDevOrigins` config is needed — `mint` handles host matching.
+- Search is disabled until `mint login` is run (optional, not required at boot).
+- Verify it works: `curl -sf -H "Host: external-preview.example.com" http://localhost:3000/` should return 200 with "Mintlify" in the body.

@@ -1,0 +1,25 @@
+services:
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - mint_cache:/root/.mintlify
+      - npm_cache:/root/.npm
+    ports:
+      - "3000:3000"
+    environment:
+      - BASE44_PUBLIC_HOST_SUFFIX=${BASE44_PUBLIC_HOST_SUFFIX}
+      # Make Next.js (under mint) accept the preview's external origin
+      - NODE_OPTIONS=--dns-result-order=ipv4first
+    command: sh -c "npm i -g mint@latest && mint dev --port 3000 --host 0.0.0.0"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+volumes:
+  mint_cache:
+  npm_cache:
